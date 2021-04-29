@@ -379,7 +379,6 @@ namespace Rhino.FileIO
     }
 
 #if !MOBILE_BUILD
-#if RHINO_SDK
     /// <summary>
     /// Attempts to read the preview image out of a 3dm file.
     /// </summary>
@@ -389,8 +388,12 @@ namespace Rhino.FileIO
     /// <since>5.0</since>
     public static System.Drawing.Bitmap ReadPreviewImage(string path)
     {
+      // 4-28-2021 Dale Fugier, as of today this code only run on Windows,
+      // either with or without Rhino.
+
       if (!File.Exists(path))
         throw new FileNotFoundException("The provided path is null, does not exist or cannot be accessed.", path);
+
       System.Drawing.Bitmap rc = null;
       if(Rhino.Runtime.HostUtils.RunningOnWindows)
       {
@@ -400,16 +403,17 @@ namespace Rhino.FileIO
           rc = System.Drawing.Image.FromHbitmap(ptr_bitmap);
         }
       }
-      else if(Rhino.Runtime.HostUtils.RunningOnOSX)
-      {
-        var nsimage = UnsafeNativeMethods.ONX_Model_MacReadPreviewImage(path);
-        if(nsimage != IntPtr.Zero)
-          rc = System.Drawing.Image.FromHbitmap(nsimage);
-      }
+      // 4-28-2021 Dale Fugier, until librhino3dm_native included the AppKit framework
+      // leave this commented out
+      //else if(Rhino.Runtime.HostUtils.RunningOnOSX)
+      //{
+      //  var nsimage = UnsafeNativeMethods.ONX_Model_MacReadPreviewImage(path);
+      //  if(nsimage != IntPtr.Zero)
+      //    rc = System.Drawing.Image.FromHbitmap(nsimage);
+      //}
       return rc;
     }
-#endif // !MOBILE_BUILD
-#endif
+#endif // #if !MOBILE_BUILD
 
 #if RHINO_SDK
     /// <summary>
